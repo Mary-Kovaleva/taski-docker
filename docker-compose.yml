@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=taski_db
+      - POSTGRES_USER=taski_user
+      - POSTGRES_PASSWORD=taski_password
+
+  backend:
+    build:
+      context: ./backend
+    command: >
+      sh -c "while ! nc -z db 5432; do sleep 1; done &&
+             python manage.py migrate &&
+             gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    command: cp -r /app/build/. /static/
+    volumes:
+      - static_volume:/static/
+    expose:
+      - "8000"
+    depends_on:
+      - backend
+
+  gateway:
+    image: nginx:1.21.3-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/static/
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
+  static_volume:

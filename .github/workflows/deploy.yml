@@ -16,20 +16,24 @@ jobs:
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml"
-          target: "~/taski/"
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          source: "."
+          target: "/home/yc-user/taski-docker"
+          rm: true
 
-      - name: SSH remote commands
+      - name: Run commands on server
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd ~/taski/
-            sudo docker compose pull
-            sudo docker compose down
-            sudo docker compose up -d
+            cd taski-docker
+            docker compose down -v
+            docker pull ${{ secrets.DOCKER_USERNAME }}/taski-backend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/taski-frontend:latest
+            docker compose up -d

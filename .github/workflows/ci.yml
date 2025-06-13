@@ -1,10 +1,8 @@
 name: Django CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  push:        { branches: [main] }
+  pull_request:{ branches: [main] }
 
 jobs:
   test:
@@ -29,7 +27,7 @@ jobs:
       POSTGRES_DB: taski_db
       POSTGRES_USER: taski_user
       POSTGRES_PASSWORD: taski_password
-      DB_HOST: db
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
 
     steps:

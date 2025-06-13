@@ -1,14 +1,11 @@
 name: Deploy to VPS
 
 on:
-  workflow_run:
-    workflows: ["CD-build"]
-    types: [completed]
+  push:
     branches: [main]
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -21,12 +18,11 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}   # если ключ с паролем
           source: |
             docker-compose.yml
-            .env
             nginx/default.conf
           target: /home/yc-user/taski-docker
-          rm: false
 
       - name: Run docker compose up on server
         uses: appleboy/ssh-action@v1.0.0
@@ -34,6 +30,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd ~/taski-docker
             docker compose pull

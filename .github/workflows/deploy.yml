@@ -1,39 +1,45 @@
-name: Deploy to Server
+name: Deploy to VPS
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]          
+  workflow_run:               
+    workflows: ["CD-build"]  
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
+      
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
-          source: "."
-          target: "/home/yc-user/taski-docker"
-          rm: true
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_KEY }}           
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: |
+            docker-compose.yml
+            .env
+            nginx/default.conf
+          target: /home/yc-user/taski-docker    
+          rm: false
 
-      - name: Run commands on server
+    
+      - name: Run docker compose up on server
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            cd taski-docker
-            docker compose down -v
-            docker pull ${{ secrets.DOCKER_USERNAME }}/taski-backend:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/taski-frontend:latest
-            docker compose up -d
+            cd ~/taski-docker
+            docker compose pull
+            docker compose up -d --remove-orphans

@@ -1,6 +1,6 @@
-from dotenv import load_dotenv
-from pathlib import Path
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -67,11 +67,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'taski_db',
-        'USER': 'taski_user',
-        'PASSWORD': 'taski_password',
-        'HOST': 'db',
-        'PORT': 5432,
+        'NAME':     os.getenv('POSTGRES_DB',       'taski_db'),
+        'USER':     os.getenv('POSTGRES_USER',     'taski_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'taski_password'),
+        'HOST':     os.getenv('DB_HOST',           '127.0.0.1'),
+        'PORT':     os.getenv('DB_PORT',           '5432'),
     }
 }
 

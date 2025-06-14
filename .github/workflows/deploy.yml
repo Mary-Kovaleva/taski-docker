@@ -18,7 +18,6 @@ jobs:
           host:       ${{ secrets.SSH_HOST }}
           username:   ${{ secrets.SSH_USER }}
           key:        ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
 
           source: "docker-compose.yml,.env,nginx/default.conf"
           target: /home/yc-user/taski-docker
@@ -30,7 +29,6 @@ jobs:
           host:       ${{ secrets.SSH_HOST }}
           username:   ${{ secrets.SSH_USER }}
           key:        ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd ~/taski-docker
             docker compose pull

@@ -1,19 +1,17 @@
-FROM node:16-alpine
-
+FROM node:18.15.0
 WORKDIR /app
 
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-COPY package*.json ./
 RUN npm install
 
 COPY . .
 RUN npm run build
 
-RUN npm install -g serve
-
-EXPOSE 8000
-
-CMD ["serve", "-s", "build", "--listen", "8000"]
+# Эта команда запустит встроенный сервер на Node.js, который будет раздавать
+# содержимое директории /app/build на порте 8000
+CMD ["npx", "-y", "http-server", "-p", "8000", "/app/build"]
 
 
 
